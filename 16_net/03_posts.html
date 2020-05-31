@@ -1,0 +1,38 @@
+<html>
+    <head>
+        <script
+                src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+                integrity="sha256-4+XzXVhsDmqanXGHaHvgh1gMQKX40OUvDEBTu8JcmNs="
+                crossorigin="anonymous"></script>
+        <script type="text/javascript" src="//cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"> </script>
+        <link type="text/css" rel="stylesheet" href="//cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css">
+    </head>
+    <body>
+        <h1>{{ .Name }} {{ .Email}}  </h1>
+        <h2>Posts</h2>
+        <table id="myTable">
+            <thead>
+                <th>Title</th>
+                <th>Created At</th>
+                <th>Last Modified At</th>
+                <th>#</th>
+            </thead>
+            <tbody>
+                {{ range $k, $v := .Posts }}
+                    <tr>
+                        <td>{{ $v.Title }}</td>
+                        <td>{{ $v.CreatedAt }}</td>
+                        <td>{{ $v.LastModifiedAt }}</td>
+                        <td>{{ $k }}</td>
+                    </tr>
+                {{ end }}
+            </tbody>
+        </table>
+
+        <script type="text/javascript">
+            $(document).ready(function () {
+                $('#myTable').DataTable();
+            });
+        </script>
+    </body>
+</html>
