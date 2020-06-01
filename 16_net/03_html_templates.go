@@ -2,6 +2,7 @@ package main
 
 import (
 	"html/template"
+	"log"
 )
 import "net/http"
 
@@ -19,7 +20,9 @@ type About struct {
 
 func main() {
 	http.HandleFunc("/", postsHandler)
-	http.ListenAndServe(":8020", nil)
+	if err := http.ListenAndServe(":8020", nil); err != nil {
+		log.Fatalf("HTTP server failed on 8020: %v", err)
+	}
 }
 
 func postsHandler(w http.ResponseWriter, r *http.Request) {

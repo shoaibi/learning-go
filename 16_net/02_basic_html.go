@@ -1,12 +1,17 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"log"
+)
 import "net/http"
 
 func main() {
 	http.HandleFunc("/", plainHandler)
 	http.HandleFunc("/html", htmlHandler)
-	http.ListenAndServe(":8020", nil)
+	if err := http.ListenAndServe(":8020", nil); err != nil {
+		log.Fatalf("HTTP server failed on 8020: %v", err)
+	}
 }
 
 func plainHandler(w http.ResponseWriter, r *http.Request) {
