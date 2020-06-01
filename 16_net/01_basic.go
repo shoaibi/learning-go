@@ -10,7 +10,11 @@ func main() {
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(201)
+	// Generally recommended to write the StatusCode and
+	// content-type headers to save the language from adding
+	// it which could be a costly operation on huge responses
+	w.Header().Set("Content-Type", "text/plain; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
 	fmt.Fprint(w, "Index page")
 }
 
