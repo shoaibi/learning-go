@@ -11,7 +11,7 @@ type Handler struct {
 }
 
 func (h *Handler) Home(w http.ResponseWriter, r *http.Request) {
-	h.logger.Println("Request processed")
+	h.logger.Println("[Handler] Loaded Homepage")
 	w.Header().Set("Content-Type", "text/plain; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Homepage loaded"))
@@ -21,17 +21,50 @@ func New(logger *log.Logger) *Handler {
 	return &Handler{logger: logger}
 }
 
-// middleware
-func (h *Handler) Logger(next http.HandlerFunc) http.HandlerFunc  {
+// middlewares
+func (h *Handler) Timed(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		defer h.logger.Printf("Request processed in: %v", time.Now().Sub(start))
-		next(w, r)
+		// could also do next(w,r)
+		next.ServeHTTP(w, r)
 	}
 }
 
-// Defining routes locally, makes it easier to tests
+func (h *Handler) Log(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		h.logger.Println("Request Method: ", r.Method)
+		h.logger.Println("Request URL: ", r.URL)
+		h.logger.Println("Request UserAgent: ", r.UserAgent())
+		h.logger.Println("Request Host: ", r.Host)
+		h.logger.Println("Request Protocol: ", r.Proto)
+		h.logger.Println("Requester IP: ", r.RemoteAddr)
+		// could also do next(w,r)
+		next.ServeHTTP(w, r)
+	}
+}
+
+// This type is just to make code more readable
+type Middleware func(http.HandlerFunc) http.HandlerFunc
+
+func with(handler http.HandlerFunc, middleware ...Middleware) http.HandlerFunc {
+	if len(middleware) < 1 {
+		return handler
+	}
+
+	wrapped := handler
+
+	// loop in reverse to preserve middleware order
+	for i := len(middleware) - 1; i >= 0; i-- {
+		wrapped = middleware[i](wrapped)
+	}
+
+	return wrapped
+}
+
+// Defining routes locally, makes it easier to test
 // and keeps context in one place
 func (h *Handler) SetupRoutes(mux *http.ServeMux) {
-	mux.HandleFunc("/", h.Logger(h.Home))
+	commonMiddleware := []Middleware{h.Timed, h.Log}
+	mux.HandleFunc("/", with(h.Home, commonMiddleware...))
 }
