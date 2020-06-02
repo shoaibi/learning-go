@@ -44,24 +44,6 @@ func (h *Handler) Log(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-// This type is just to make code more readable
-type Middleware func(http.HandlerFunc) http.HandlerFunc
-
-func with(handler http.HandlerFunc, middleware ...Middleware) http.HandlerFunc {
-	if len(middleware) < 1 {
-		return handler
-	}
-
-	wrapped := handler
-
-	// loop in reverse to preserve middleware order
-	for i := len(middleware) - 1; i >= 0; i-- {
-		wrapped = middleware[i](wrapped)
-	}
-
-	return wrapped
-}
-
 // Defining routes locally, makes it easier to test
 // and keeps context in one place
 func (h *Handler) SetupRoutes(mux *http.ServeMux) {
